@@ -5,8 +5,7 @@
 <script setup lang="ts">
 import {socket} from "../api/socket";
 import {ElMessage} from "element-plus";
-import {ServerOption} from "../api/common";
-import {ProducerInfo} from "../api/kafka";
+import {ProducerInfo, ServerOption} from "../api/common";
 import {ref} from "vue";
 
 defineProps<{
