@@ -7,8 +7,9 @@ import {onMounted, reactive, ref, watch} from "vue";
 import {ElScrollbar as ElScrollbarType} from "element-plus/es/components/scrollbar";
 import {socket} from "../api/socket";
 import {ElMessage, FormInstance, FormRules} from "element-plus";
-import {ModelOption, REGEX_IP, ServerOption} from "../api/common";
-import {ConsumerInfo, KafkaEntity, KafkaOption, KMessage, ProducerInfo} from "../api/kafka";
+import {ConsumerInfo, ModelOption, ProducerInfo, REGEX_IP, ServerOption} from "../api/common";
+import {KafkaEntity} from "../api/kafka";
+import {Message} from "../api/common";
 
 const info = ref<KafkaEntity>(new KafkaEntity())
 
@@ -23,7 +24,7 @@ const producerInfo = ref<ProducerInfo>({
     value: ''
 })
 
-const messages = ref<Array<KMessage>>([])
+const messages = ref<Array<Message>>([])
 const innerRef = ref<HTMLDivElement>()
 const scrollbarRef = ref<InstanceType<typeof ElScrollbarType>>()
 const ruleFormRef = ref<FormInstance>();
@@ -55,8 +56,8 @@ const rules = reactive<FormRules>({
 })
 
 onMounted(() => {
-    socket.on(KafkaOption.CONSUMER_EVENT, (key: string, value: string) => {
-        messages.value.push(new KMessage(key, value))
+    socket.on(ServerOption.CONSUMER_EVENT, (key: string, value: string) => {
+        messages.value.push(new Message(key, value))
     });
 })
 
@@ -79,7 +80,7 @@ watch(
 )
 
 function initHistory() {
-    socket.emit(KafkaOption.EVENT, ModelOption.LIST, ServerOption.PLACEHOLDER, (response: KafkaEntity[]) => {
+    socket.emit("kafka", ModelOption.LIST, ServerOption.PLACEHOLDER, (response: KafkaEntity[]) => {
         record.value = response
     })
 }
@@ -88,7 +89,7 @@ initHistory()
 
 function define(entity: KafkaEntity) {
     info.value = entity
-    socket.emit(KafkaOption.EVENT, KafkaOption.CONNECT, info.value, (response: string[]) => {
+    socket.emit("kafka", ServerOption.CONNECT, info.value, (response: string[]) => {
         info.value.topics = response
     })
 }
@@ -100,11 +101,11 @@ function consumer() {
     }
     if (consumerInfo.value.type === 1) {
         // 消费
-        socket.emit(KafkaOption.EVENT, KafkaOption.CONSUMER, consumerInfo.value)
+        socket.emit("kafka", ServerOption.CONSUMER, consumerInfo.value)
         consumerInfo.value.type = 2
     } else if (consumerInfo.value.type === 2) {
         // 停止
-        socket.emit(KafkaOption.EVENT, KafkaOption.STOP_CONSUMER, {
+        socket.emit("kafka", ServerOption.STOP_CONSUMER, {
             name: info.value.name
         })
         consumerInfo.value.type = 1
@@ -117,7 +118,7 @@ function producer() {
         return
     }
     // 生产
-    socket.emit(KafkaOption.EVENT, KafkaOption.PRODUCER, producerInfo.value)
+    socket.emit("kafka", ServerOption.PRODUCER, producerInfo.value)
 }
 
 function confirmClick() {
@@ -130,7 +131,7 @@ function handleEdit(index: number, row: KafkaEntity) {
 }
 
 function handleDelete(index: number, row: KafkaEntity) {
-    socket.emit(KafkaOption.EVENT, ModelOption.DELETE, row, (res: boolean) => {
+    socket.emit("kafka", ModelOption.DELETE, row, (res: boolean) => {
         if (res) {
             initHistory()
         }
@@ -163,12 +164,12 @@ function onSubmit() {
     ruleFormRef.value?.validate((valid, fields) => {
         if (valid) {
             if (!Object.is(formInfo.value.id, undefined)) {
-                socket.emit(KafkaOption.EVENT, ModelOption.UPDATE, formInfo.value, (res: boolean) => {
+                socket.emit("kafka", ModelOption.UPDATE, formInfo.value, (res: boolean) => {
                     successAfter()
                     message(res)
                 })
             } else {
-                socket.emit(KafkaOption.EVENT, ModelOption.SAVE, formInfo.value, (res: boolean) => {
+                socket.emit("kafka", ModelOption.SAVE, formInfo.value, (res: boolean) => {
                     successAfter()
                     message(res)
                 })
@@ -341,7 +342,6 @@ input {
   text-align: center;
   align-items: center;
   font-family: "Microsoft Sans Serif", serif;
-  font-size: 16px;
 
   #info {
     display: flex;

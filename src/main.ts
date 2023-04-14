@@ -17,7 +17,7 @@ app.use(ElementPlus)
 app.mount('#app').$nextTick(() => {
     postMessage({payload: 'removeLoading'}, '*')
 }).then(()=>{
-    router.push("/kafka")
+    router.push("/rabbit")
 })
 
 

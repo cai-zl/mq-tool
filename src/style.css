@@ -16,6 +16,10 @@ html, body, #app {
     height: 100%;
 }
 
+:root {
+    --el-font-size-base: 16px;
+}
+
 body {
     background-image: url('../public/backimage.jpg');
     background-repeat: no-repeat;
