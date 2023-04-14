@@ -1,5 +1,5 @@
 import {Consumer, Kafka} from "kafkajs";
-import {BaseHandler, Closeable} from "../common/common.handler";
+import {BaseHandler, Closeable, ConsumerInfo, MqOption, ProducerInfo} from "../common/common.handler";
 import {Socket} from "socket.io";
 import {KafkaEntity} from "../entity/kafka.entity";
 
@@ -7,18 +7,6 @@ import {KafkaEntity} from "../entity/kafka.entity";
  * @author cai zl
  * @since 2023/3/29 19:12
  */
-interface ConsumerInfo {
-    topic: string
-    groupId: string
-    type: number
-}
-
-interface ProducerInfo {
-    topic: string
-    key: string
-    value: string
-}
-
 export class KafkaHandler extends BaseHandler<KafkaEntity> implements Closeable {
 
     private static INSTANCE: KafkaHandler
@@ -41,18 +29,10 @@ export class KafkaHandler extends BaseHandler<KafkaEntity> implements Closeable 
     }
 
     doRegistry() {
-        super.registry(KafkaOption.CONNECT, (option, arg, callback) => {
-            this.connect(arg, callback)
-        })
-        super.registry(KafkaOption.CONSUMER, (option, arg, callback) => {
-            this.consumer(arg, callback)
-        })
-        super.registry(KafkaOption.STOP_CONSUMER, (option, arg, callback) => {
+        super.registry(MqOption.STOP_CONSUMER, (option, arg, callback) => {
             this.close()
         })
-        super.registry(KafkaOption.PRODUCER, (option, arg, callback) => {
-            this.producer(arg as unknown as ProducerInfo, callback)
-        })
+
     }
 
     close() {
@@ -67,7 +47,7 @@ export class KafkaHandler extends BaseHandler<KafkaEntity> implements Closeable 
         }
     }
 
-    private producer(producerInfo: ProducerInfo, callback: Function) {
+    producer(option: string, producerInfo: ProducerInfo, callback: Function) {
         const producer = this.client.producer();
         producer.connect().then(() => {
             producer.send({
@@ -79,14 +59,14 @@ export class KafkaHandler extends BaseHandler<KafkaEntity> implements Closeable 
         })
     }
 
-    private consumer(consumerInfo: ConsumerInfo, callback: Function) {
+    consumer(option: string, consumerInfo: ConsumerInfo, callback: Function) {
         const consumer = this.client.consumer({groupId: consumerInfo.groupId});
         consumer.connect().then(() => {
             this.active = consumer
             consumer.subscribe({topic: consumerInfo.topic, fromBeginning: true}).then(() => {
                 consumer.run({
                     eachMessage: async ({topic, partition, message, heartbeat, pause}) => {
-                        this.socket.emit(KafkaOption.CONSUMER_EVENT, message.key!.toString(), message.value!.toString())
+                        this.socket.emit(MqOption.CONSUMER_EVENT, message.key!.toString(), message.value!.toString())
                     },
                 }).then(r => {
                     if (r !== null) {
@@ -97,7 +77,7 @@ export class KafkaHandler extends BaseHandler<KafkaEntity> implements Closeable 
         })
     }
 
-    private connect(entity: KafkaEntity, callback: Function) {
+    connect(option: string, entity: KafkaEntity, callback: Function) {
         if (this.name !== entity.name || this.host !== entity.host || this.port !== entity.port) {
             this.client = new Kafka({
                 clientId: entity.name,
@@ -158,15 +138,3 @@ export class KafkaHandler extends BaseHandler<KafkaEntity> implements Closeable 
     }
 
 }
-
-export enum KafkaOption {
-
-    EVENT = "kafka",
-    CONSUMER_EVENT = "consumer",
-    CONNECT = "connect",
-    CONSUMER = "consumer",
-    STOP_CONSUMER = "stopConsumer",
-    PRODUCER = "producer",
-
-}
-

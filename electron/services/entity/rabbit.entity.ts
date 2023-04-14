@@ -1,8 +1,12 @@
+/**
+ * @author cai zl
+ * @since 2023/4/14 19:21
+ */
 import {Entity, Column, PrimaryGeneratedColumn, BaseEntity} from "typeorm"
 import {MqEntity} from "../common/common.handler";
 
 @Entity({name: 'kafka'})
-export class KafkaEntity extends BaseEntity implements MqEntity {
+export class RabbitEntity extends BaseEntity implements MqEntity {
     @PrimaryGeneratedColumn()
     id: number
     @Column({type: 'text'})
