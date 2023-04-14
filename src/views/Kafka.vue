@@ -10,6 +10,9 @@ import {ElMessage, FormInstance, FormRules} from "element-plus";
 import {ConsumerInfo, ModelOption, ProducerInfo, REGEX_IP, ServerOption} from "../api/common";
 import {KafkaEntity} from "../api/kafka";
 import {Message} from "../api/common";
+import Producer from "../components/Producer.vue";
+import ManageEnvironment from "../components/ManageEnvironment.vue";
+import Consumer from "../components/Consumer.vue";
 
 const info = ref<KafkaEntity>(new KafkaEntity())
 
@@ -184,139 +187,147 @@ function onSubmit() {
 </script>
 <template>
 
-    <el-drawer v-model="drawer" direction="ttb" size="50%">
-        <template #default>
-            <div>
-                <el-drawer
-                        direction="ttb"
-                        v-model="innerDrawer"
-                        title="Add Environment"
-                        :append-to-body="true"
-                        :before-close="handleClose">
-                    <el-form
-                            ref="ruleFormRef"
-                            :inline="true"
-                            :model="formInfo"
-                            :rules="rules"
-                            class="demo-form-inline">
-                        <el-form-item label="Name" prop="name">
-                            <el-input v-model="formInfo.name" placeholder="Name"/>
-                        </el-form-item>
-                        <el-form-item label="Host" prop="host">
-                            <el-input v-model="formInfo.host" placeholder="Host"/>
-                        </el-form-item>
-                        <el-form-item label="Port" prop="port">
-                            <el-input v-model="formInfo.port" placeholder="Port"/>
-                        </el-form-item>
-                        <el-form-item>
-                            <el-button type="primary" @click="onSubmit">Submit</el-button>
-                        </el-form-item>
-                    </el-form>
-                </el-drawer>
-            </div>
-            <el-table :data="record">
-                <el-table-column prop="name" label="Name"/>
-                <el-table-column prop="host" label="Host"/>
-                <el-table-column prop="port" label="Port"/>
-                <el-table-column align="right" fixed="right" width="200">
-                    <template #header>
-                        <el-button type="primary" size="small" @click="innerDrawer = true">Add</el-button>
-                    </template>
-                    <template #default="scope">
-                        <el-button size="small" @click="handleEdit(scope.$index, scope.row)"
-                        >Edit
-                        </el-button>
-                        <el-button
-                                size="small"
-                                type="danger"
-                                @click="handleDelete(scope.$index, scope.row)"
-                        >Delete
-                        </el-button>
-                    </template>
-                </el-table-column>
-            </el-table>
-        </template>
-        <template #footer>
-            <div style="flex: auto">
-                <el-button type="primary" @click="confirmClick">Finish</el-button>
-            </div>
-        </template>
-    </el-drawer>
-    <div class="main-box">
-        <!-- kafka服务地址 -->
-        <div id="info">
-            <el-button type="primary" @click="drawer = true">
-                Manage Environment
-            </el-button>
-            <el-select v-model="info"
-                       class="m-2"
-                       placeholder="Environment"
-                       value-key="id"
-                       @change="define">
-                <el-option
-                        v-for="item in record!"
-                        :key="item.id!"
-                        :label="item.name!"
-                        :value="item"
-                />
-            </el-select>
-        </div>
-        <!-- kafka对话框 -->
-        <div id="dialog">
-            <div id="producer">
-                <div>
-                    <el-input class="key" v-model="producerInfo.key"
-                              placeholder="key" clearable/>
-                    <el-input class="value" v-model="producerInfo.value"
-                              type="textarea"
-                              :rows="20"
-                              placeholder="value" clearable/>
-                </div>
+<!--    <el-drawer v-model="drawer" direction="ttb" size="50%">-->
+<!--        <template #default>-->
+<!--            <div>-->
+<!--                <el-drawer-->
+<!--                        direction="ttb"-->
+<!--                        v-model="innerDrawer"-->
+<!--                        title="Add Environment"-->
+<!--                        :append-to-body="true"-->
+<!--                        :before-close="handleClose">-->
+<!--                    <el-form-->
+<!--                            ref="ruleFormRef"-->
+<!--                            :inline="true"-->
+<!--                            :model="formInfo"-->
+<!--                            :rules="rules"-->
+<!--                            class="demo-form-inline">-->
+<!--                        <el-form-item label="Name" prop="name">-->
+<!--                            <el-input v-model="formInfo.name" placeholder="Name"/>-->
+<!--                        </el-form-item>-->
+<!--                        <el-form-item label="Host" prop="host">-->
+<!--                            <el-input v-model="formInfo.host" placeholder="Host"/>-->
+<!--                        </el-form-item>-->
+<!--                        <el-form-item label="Port" prop="port">-->
+<!--                            <el-input v-model="formInfo.port" placeholder="Port"/>-->
+<!--                        </el-form-item>-->
+<!--                        <el-form-item>-->
+<!--                            <el-button type="primary" @click="onSubmit">Submit</el-button>-->
+<!--                        </el-form-item>-->
+<!--                    </el-form>-->
+<!--                </el-drawer>-->
+<!--            </div>-->
+<!--            <el-table :data="record">-->
+<!--                <el-table-column prop="name" label="Name"/>-->
+<!--                <el-table-column prop="host" label="Host"/>-->
+<!--                <el-table-column prop="port" label="Port"/>-->
+<!--                <el-table-column align="right" fixed="right" width="200">-->
+<!--                    <template #header>-->
+<!--                        <el-button type="primary" size="small" @click="innerDrawer = true">Add</el-button>-->
+<!--                    </template>-->
+<!--                    <template #default="scope">-->
+<!--                        <el-button size="small" @click="handleEdit(scope.$index, scope.row)"-->
+<!--                        >Edit-->
+<!--                        </el-button>-->
+<!--                        <el-button-->
+<!--                                size="small"-->
+<!--                                type="danger"-->
+<!--                                @click="handleDelete(scope.$index, scope.row)"-->
+<!--                        >Delete-->
+<!--                        </el-button>-->
+<!--                    </template>-->
+<!--                </el-table-column>-->
+<!--            </el-table>-->
+<!--        </template>-->
+<!--        <template #footer>-->
+<!--            <div style="flex: auto">-->
+<!--                <el-button type="primary" @click="confirmClick">Finish</el-button>-->
+<!--            </div>-->
+<!--        </template>-->
+<!--    </el-drawer>-->
+<!--    <div class="main-box">-->
+<!--        &lt;!&ndash; kafka服务地址 &ndash;&gt;-->
+<!--        <div id="info">-->
+<!--            <el-button type="primary" @click="drawer = true">-->
+<!--                Manage Environment-->
+<!--            </el-button>-->
+<!--            <el-select v-model="info"-->
+<!--                       class="m-2"-->
+<!--                       placeholder="Environment"-->
+<!--                       value-key="id"-->
+<!--                       @change="define">-->
+<!--                <el-option-->
+<!--                        v-for="item in record!"-->
+<!--                        :key="item.id!"-->
+<!--                        :label="item.name!"-->
+<!--                        :value="item"-->
+<!--                />-->
+<!--            </el-select>-->
+<!--        </div>-->
+<!--        &lt;!&ndash; kafka对话框 &ndash;&gt;-->
+<!--        <div id="dialog">-->
+<!--            <div id="producer">-->
+<!--                <div>-->
+<!--                    <el-input class="key" v-model="producerInfo.key"-->
+<!--                              placeholder="key" clearable/>-->
+<!--                    <el-input class="value" v-model="producerInfo.value"-->
+<!--                              type="textarea"-->
+<!--                              :rows="20"-->
+<!--                              placeholder="value" clearable/>-->
+<!--                </div>-->
 
-                <div class="option">
-                    <el-input class="key" v-model="producerInfo.topic"
-                              placeholder="Topic" clearable/>
-                    <el-button
-                            class="kafka-in"
-                            @click="producer"
-                            type="primary">
-                        Send
-                    </el-button>
-                </div>
-            </div>
+<!--                <div class="option">-->
+<!--                    <el-input class="key" v-model="producerInfo.topic"-->
+<!--                              placeholder="Topic" clearable/>-->
+<!--                    <el-button-->
+<!--                            class="kafka-in"-->
+<!--                            @click="producer"-->
+<!--                            type="primary">-->
+<!--                        Send-->
+<!--                    </el-button>-->
+<!--                </div>-->
+<!--            </div>-->
 
-            <div id="consumer">
-                <div>
-                    <el-scrollbar ref="scrollbarRef" height="500px" class="box">
-                        <div ref="innerRef">
-                            <div v-for="(item, index) in messages" :key="item.key" id="message">
-                                <h1><strong class="c-title">key:</strong>{{ item.key }}</h1>
-                                <p><strong class="c-title">value:</strong>{{ item.value }}</p>
-                                <el-divider/>
-                            </div>
-                        </div>
-                    </el-scrollbar>
-                </div>
-                <div class="option">
-                    <el-select v-model="consumerInfo.topic" filterable placeholder="Topic" class="kafka-sel">
-                        <el-option v-for="item in info.topics"
-                                   :value="item">
-                        </el-option>
-                    </el-select>
-                    <el-input
-                            class="kafka-group"
-                            placeholder="Group"
-                            v-model="consumerInfo.groupId"
-                    ></el-input>
-                    <el-button
-                            class="kafka-but"
-                            @click="consumer"
-                            type="primary">
-                        <span v-if="consumerInfo.type==1">Start</span>
-                        <span v-else>Stop</span>
-                    </el-button>
-                </div>
-            </div>
+<!--            <div id="consumer">-->
+<!--                <div>-->
+<!--                    <el-scrollbar ref="scrollbarRef" height="500px" class="box">-->
+<!--                        <div ref="innerRef">-->
+<!--                            <div v-for="(item, index) in messages" :key="item.key" id="message">-->
+<!--                                <h1><strong class="c-title">key:</strong>{{ item.key }}</h1>-->
+<!--                                <p><strong class="c-title">value:</strong>{{ item.value }}</p>-->
+<!--                                <el-divider/>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                    </el-scrollbar>-->
+<!--                </div>-->
+<!--                <div class="option">-->
+<!--                    <el-select v-model="consumerInfo.topic" filterable placeholder="Topic" class="kafka-sel">-->
+<!--                        <el-option v-for="item in info.topics"-->
+<!--                                   :value="item">-->
+<!--                        </el-option>-->
+<!--                    </el-select>-->
+<!--                    <el-input-->
+<!--                            class="kafka-group"-->
+<!--                            placeholder="Group"-->
+<!--                            v-model="consumerInfo.groupId"-->
+<!--                    ></el-input>-->
+<!--                    <el-button-->
+<!--                            class="kafka-but"-->
+<!--                            @click="consumer"-->
+<!--                            type="primary">-->
+<!--                        <span v-if="consumerInfo.type==1">Start</span>-->
+<!--                        <span v-else>Stop</span>-->
+<!--                    </el-button>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
+
+    <div class="mq-box">
+        <ManageEnvironment event-name="kafka"/>
+        <div class="mq-option">
+            <Producer :textarea-row="20"/>
+            <Consumer/>
         </div>
     </div>
 </template>

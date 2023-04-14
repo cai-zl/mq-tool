@@ -1,5 +1,5 @@
 import {Consumer, Kafka} from "kafkajs";
-import {BaseHandler, Closeable, ConsumerInfo, MqOption, ProducerInfo} from "../common/common.handler";
+import {BaseHandler, Closeable, ConsumerInfo, MqHandler, MqOption, ProducerInfo} from "../common/common.handler";
 import {Socket} from "socket.io";
 import {KafkaEntity} from "../entity/kafka.entity";
 
@@ -7,7 +7,7 @@ import {KafkaEntity} from "../entity/kafka.entity";
  * @author cai zl
  * @since 2023/3/29 19:12
  */
-export class KafkaHandler extends BaseHandler<KafkaEntity> implements Closeable {
+export class KafkaHandler extends BaseHandler<KafkaEntity> implements Closeable, MqHandler<KafkaEntity> {
 
     private static INSTANCE: KafkaHandler
     private active: Consumer
@@ -32,7 +32,6 @@ export class KafkaHandler extends BaseHandler<KafkaEntity> implements Closeable 
         super.registry(MqOption.STOP_CONSUMER, (option, arg, callback) => {
             this.close()
         })
-
     }
 
     close() {
@@ -78,12 +77,10 @@ export class KafkaHandler extends BaseHandler<KafkaEntity> implements Closeable 
     }
 
     connect(option: string, entity: KafkaEntity, callback: Function) {
-        if (this.name !== entity.name || this.host !== entity.host || this.port !== entity.port) {
-            this.client = new Kafka({
-                clientId: entity.name,
-                brokers: [entity.host.concat(':').concat(entity.port.toString())],
-            })
-        }
+        this.client = new Kafka({
+            clientId: entity.name,
+            brokers: [entity.host.concat(':').concat(entity.port.toString())],
+        })
         this.name = entity.name
         this.host = entity.host
         this.port = entity.port

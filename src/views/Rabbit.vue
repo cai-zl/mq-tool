@@ -10,7 +10,7 @@ import Consumer from "../components/Consumer.vue";
 </script>
 <template>
     <div class="mq-box">
-        <ManageEnvironment event="rabbit"/>
+        <ManageEnvironment event-name="rabbit"/>
         <div class="mq-option">
             <Producer :textarea-row="20"/>
             <Consumer/>
@@ -18,23 +18,5 @@ import Consumer from "../components/Consumer.vue";
     </div>
 </template>
 <style scoped lang="scss">
-.mq-box {
-  display: flex;
-  width: 100%;
-  height: 100%;
-  flex-direction: column;
-  justify-content: center;
-  text-align: center;
-  align-items: center;
-  font-family: "Microsoft Sans Serif", serif;
 
-  .mq-option {
-    display: flex;
-    width: 100%;
-    height: 80%;
-    justify-content: space-between;
-    align-items: stretch;
-  }
-
-}
 </style>

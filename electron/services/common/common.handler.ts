@@ -122,9 +122,24 @@ export abstract class BaseHandler<T extends BaseEntity> implements Handler<T>, M
         this.registry(ModelOption.SAVE, this.save)
         this.registry(ModelOption.UPDATE, this.update)
         this.registry(ModelOption.DELETE, this.delete)
-        this.registry(MqOption.CONNECT, this.connect)
-        this.registry(MqOption.CONSUMER, this.consumer)
-        this.registry(MqOption.PRODUCER, this.producer)
+        /**
+         * 1.this.registry(ModelOption.DELETE, this.delete)
+         * 1.这种方式会因为this关键字的特性引发问题
+         *
+         * 2.this.registry(MqOption.CONNECT, (option, arg, callback) => {
+         *             this.connect(option, arg, callback)
+         *   })
+         * 2.这种方式可以解决this关键字的问题
+         */
+        this.registry(MqOption.CONNECT, (option, arg, callback) => {
+            this.connect(option, arg, callback)
+        })
+        this.registry(MqOption.CONSUMER, (option, arg, callback) => {
+            this.consumer(option, arg, callback)
+        })
+        this.registry(MqOption.PRODUCER, (option, arg, callback) => {
+            this.producer(option, arg, callback)
+        })
         // 扩展其他处理策略
         this.doRegistry()
     }

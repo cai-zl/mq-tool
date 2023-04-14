@@ -1,17 +1,31 @@
 <script setup lang="ts">
 import {RouterLink, RouterView} from 'vue-router'
+import {router} from "./router";
+
+const routes = router.getRoutes();
+const currentRoute = router.currentRoute;
+
+function currentMenu(name: string): string {
+    if (name == currentRoute.value.name) {
+        return 'currentMenu'
+    }
+    return ''
+}
+
 </script>
 
 <template>
-  <div id="main-box">
-    <div id="left">
-      <router-link to="/kafka" class="menu-item"><span>Kafka</span></router-link>
-      <router-link to="/rabbit" class="menu-item"><span>Rabbit</span></router-link>
+    <div id="main-box">
+        <div id="left">
+            <router-link v-for="item in routes" :to="item.path" class="menu-item" :key="item.name"
+                         :class="currentMenu(item.name as string)"
+            >
+                <span>{{ item.name }}</span></router-link>
+        </div>
+        <div id="right">
+            <router-view/>
+        </div>
     </div>
-    <div id="right">
-      <router-view/>
-    </div>
-  </div>
 </template>
 
 <style lang="scss">
@@ -40,6 +54,12 @@ import {RouterLink, RouterView} from 'vue-router'
       justify-content: center;
 
       &:hover {
+        background-color: #fff;
+        border-radius: 20px;
+        color: aqua;
+      }
+
+      &.currentMenu {
         background-color: #fff;
         border-radius: 20px;
         color: aqua;

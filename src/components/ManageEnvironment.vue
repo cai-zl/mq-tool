@@ -4,18 +4,18 @@
 -->
 <script setup lang="ts">
 
-import {onMounted, reactive, ref, watch} from "vue";
+import {onMounted, reactive, Ref, ref, watch} from "vue";
 import {ElScrollbar as ElScrollbarType} from "element-plus/es/components/scrollbar";
 import {socket} from "../api/socket";
 import {ElMessage, FormInstance, FormRules} from "element-plus";
 import {ModelOption, REGEX_IP, ServerOption} from "../api/common";
 import {MqEntity, Message} from "../api/common"
 
-defineProps<{
-    event?: string
+const props = defineProps<{
+    eventName: string
 }>()
 
-const info = ref<MqEntity>(new MqEntity())
+const topics = ref<string[]>()
 
 const messages = ref<Array<Message>>([])
 const innerRef = ref<HTMLDivElement>()
@@ -73,15 +73,16 @@ watch(
 )
 
 function initHistory() {
-    socket.emit(event!, ModelOption.LIST, ServerOption.PLACEHOLDER, (response: MqEntity[]) => {
+    socket.emit(props.eventName, ModelOption.LIST, ServerOption.PLACEHOLDER, (response: MqEntity[]) => {
         record.value = response
     })
 }
 
+initHistory()
+
 function define(entity: MqEntity) {
-    info.value = entity
-    socket.emit(event!, ServerOption.CONNECT, info.value, (response: string[]) => {
-        info.value.topics = response
+    socket.emit(props.eventName, ServerOption.CONNECT, entity, (response: string[]) => {
+        topics.value = response
     })
 }
 
@@ -95,7 +96,7 @@ function handleEdit(index: number, row: MqEntity) {
 }
 
 function handleDelete(index: number, row: MqEntity) {
-    socket.emit(event!, ModelOption.DELETE, row, (res: boolean) => {
+    socket.emit(props.eventName, ModelOption.DELETE, row, (res: boolean) => {
         if (res) {
             initHistory()
         }
@@ -128,12 +129,12 @@ function onSubmit() {
     ruleFormRef.value?.validate((valid, fields) => {
         if (valid) {
             if (!Object.is(formInfo.value.id, undefined)) {
-                socket.emit(event!, ModelOption.UPDATE, formInfo.value, (res: boolean) => {
+                socket.emit(props.eventName, ModelOption.UPDATE, formInfo.value, (res: boolean) => {
                     successAfter()
                     message(res)
                 })
             } else {
-                socket.emit(event!, ModelOption.SAVE, formInfo.value, (res: boolean) => {
+                socket.emit(props.eventName, ModelOption.SAVE, formInfo.value, (res: boolean) => {
                     successAfter()
                     message(res)
                 })
@@ -209,8 +210,7 @@ function onSubmit() {
         <el-button type="primary" @click="drawer = true">
             Manage Environment
         </el-button>
-        <el-select v-model="info"
-                   class="m-2"
+        <el-select class="m-2"
                    placeholder="Environment"
                    value-key="id"
                    @change="define">
@@ -226,17 +226,17 @@ function onSubmit() {
 <style scoped lang="scss">
 
 .manage-box {
-    display: flex;
-    width: 100%;
-    flex-direction: column;
-    justify-content: stretch;
-    align-items: center;
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  justify-content: stretch;
+  align-items: center;
 
-    > div {
-        display: flex;
-        font-weight: 700;
-        justify-content: space-between;
-        align-items: center;
-    }
+  > div {
+    display: flex;
+    font-weight: 700;
+    justify-content: space-between;
+    align-items: center;
+  }
 }
 </style>
