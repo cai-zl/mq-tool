@@ -3,12 +3,25 @@
     @since 2023/4/14 13:41
 -->
 <script setup lang="ts">
-import {onMounted, ref, watch} from "vue";
+import {computed, onMounted, ref, watch} from "vue";
 import {ElScrollbar as ElScrollbarType} from "element-plus/es/components/scrollbar";
 import {socket} from "../api/socket";
 import {ElMessage} from "element-plus";
-import {ConsumerInfo, MqEntity, ServerOption} from "../api/common";
+import {ConsumerInfo, MqEntity, RawsReference, ServerOption} from "../api/common";
 import {Message} from "../api/common";
+
+const props = defineProps<{
+    eventName: string
+    topics: RawsReference<string[]>
+}>()
+
+const topics = computed<string[]>(() => {
+    return props.topics.value
+})
+
+const eventName = computed<string>(() => {
+    return props.eventName
+})
 
 const info = ref<MqEntity>(new MqEntity())
 
@@ -44,11 +57,11 @@ function consumer() {
     }
     if (consumerInfo.value.type === 1) {
         // 消费
-        socket.emit("kafka", ServerOption.CONSUMER, consumerInfo.value)
+        socket.emit(eventName.value, ServerOption.CONSUMER, consumerInfo.value)
         consumerInfo.value.type = 2
     } else if (consumerInfo.value.type === 2) {
         // 停止
-        socket.emit("kafka", ServerOption.STOP_CONSUMER, {
+        socket.emit(eventName.value, ServerOption.STOP_CONSUMER, {
             name: info.value.name
         })
         consumerInfo.value.type = 1
@@ -79,7 +92,7 @@ function message(status: boolean) {
         </div>
         <div class="option">
             <el-select v-model="consumerInfo.topic" filterable placeholder="Topic" class="kafka-sel">
-                <el-option v-for="item in info.topics"
+                <el-option v-for="item in topics"
                            :value="item">
                 </el-option>
             </el-select>

@@ -5,7 +5,7 @@
 import {Entity, Column, PrimaryGeneratedColumn, BaseEntity} from "typeorm"
 import {MqEntity} from "../common/common.handler";
 
-@Entity({name: 'kafka'})
+@Entity({name: 'rabbit'})
 export class RabbitEntity extends BaseEntity implements MqEntity {
     @PrimaryGeneratedColumn()
     id: number
@@ -15,7 +15,5 @@ export class RabbitEntity extends BaseEntity implements MqEntity {
     host: string
     @Column({type: 'int'})
     port: number
-    topics: string[]
-
 }
 

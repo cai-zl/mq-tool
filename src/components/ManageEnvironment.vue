@@ -4,22 +4,18 @@
 -->
 <script setup lang="ts">
 
-import {onMounted, reactive, Ref, ref, watch} from "vue";
-import {ElScrollbar as ElScrollbarType} from "element-plus/es/components/scrollbar";
+import {computed, reactive, ref, watch} from "vue";
 import {socket} from "../api/socket";
 import {ElMessage, FormInstance, FormRules} from "element-plus";
-import {ModelOption, REGEX_IP, ServerOption} from "../api/common";
-import {MqEntity, Message} from "../api/common"
+import {ModelOption, RawsReference, REGEX_IP, ServerOption} from "../api/common";
+import {MqEntity} from "../api/common"
 
 const props = defineProps<{
     eventName: string
+    topics: RawsReference<string[]>
+    currentEnv: RawsReference<MqEntity>
 }>()
 
-const topics = ref<string[]>()
-
-const messages = ref<Array<Message>>([])
-const innerRef = ref<HTMLDivElement>()
-const scrollbarRef = ref<InstanceType<typeof ElScrollbarType>>()
 const ruleFormRef = ref<FormInstance>();
 const drawer = ref(false)
 const innerDrawer = ref(false)
@@ -47,21 +43,14 @@ const rules = reactive<FormRules>({
         },
     ],
 })
-
-onMounted(() => {
-    socket.on(ServerOption.CONSUMER_EVENT, (key: string, value: string) => {
-        messages.value.push(new Message(key, value))
-    });
-})
-
-watch(
-    () => messages.value.length,
-    () => {
-        if (!Object.is(scrollbarRef, undefined)) {
-            scrollbarRef.value!.setScrollTop(innerRef.value!.clientHeight)
-        }
+const currentEnv = computed<MqEntity>({
+    get: () => {
+        return props.currentEnv.value
+    },
+    set: (value) => {
+        props.currentEnv.value = value
     }
-)
+})
 
 watch(
     () => drawer.value,
@@ -82,7 +71,7 @@ initHistory()
 
 function define(entity: MqEntity) {
     socket.emit(props.eventName, ServerOption.CONNECT, entity, (response: string[]) => {
-        topics.value = response
+        props.topics.value = response
     })
 }
 
@@ -106,6 +95,7 @@ function handleDelete(index: number, row: MqEntity) {
 
 function handleClose(done: () => void) {
     done()
+    formInfo.value = new MqEntity()
 }
 
 function successAfter() {
@@ -211,14 +201,15 @@ function onSubmit() {
             Manage Environment
         </el-button>
         <el-select class="m-2"
+                   v-model="currentEnv"
                    placeholder="Environment"
                    value-key="id"
                    @change="define">
             <el-option
-                    v-for="item in record!"
-                    :key="item.id!"
-                    :label="item.name!"
-                    :value="item"
+                    v-for="value in record!"
+                    :key="value.id!"
+                    :label="value.name!"
+                    :value="value"
             />
         </el-select>
     </div>

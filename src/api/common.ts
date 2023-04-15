@@ -54,3 +54,21 @@ export interface ProducerInfo{
     key: string,
     value: string
 }
+
+export class RawsReference<T> {
+
+    private _value: T
+
+    constructor(value: T) {
+        this._value = value;
+    }
+
+    get value(): T {
+        return this._value;
+    }
+
+    set value(value: T) {
+        this._value = value;
+    }
+}
+

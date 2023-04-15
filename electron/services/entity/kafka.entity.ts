@@ -11,7 +11,5 @@ export class KafkaEntity extends BaseEntity implements MqEntity {
     host: string
     @Column({type: 'int'})
     port: number
-    topics: string[]
-
 }
 
