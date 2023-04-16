@@ -10,7 +10,9 @@ export class MqEntity {
     name?: string
     host?: string
     port?: number
-    topics?: string[]
+
+    username?: string
+    password?: string
 }
 
 export class Message {
@@ -49,7 +51,7 @@ export interface ConsumerInfo {
     type: number
 }
 
-export interface ProducerInfo{
+export interface ProducerInfo {
     topic: string,
     key: string,
     value: string

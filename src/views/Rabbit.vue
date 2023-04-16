@@ -19,11 +19,14 @@ const env = ref(new RawsReference(new MqEntity()))
     <div class="mq-box">
         <ManageEnvironment :event-name="event"
                            :topics="topics"
-                           :current-env="env"/>
+                           :current-env="env"
+                           has-password
+                           has-username/>
         <div class="mq-option">
             <Producer :textarea-row="20"/>
             <Consumer :event-name="event"
-                      :topics="topics"/>
+                      :topics="topics"
+                      c-type="input"/>
         </div>
     </div>
 </template>

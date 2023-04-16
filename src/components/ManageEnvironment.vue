@@ -14,7 +14,25 @@ const props = defineProps<{
     eventName: string
     topics: RawsReference<string[]>
     currentEnv: RawsReference<MqEntity>
+    hasUsername: boolean
+    hasPassword: boolean
 }>()
+
+const hasUsername = computed<boolean>(() => {
+    return props.hasUsername
+})
+
+const hasPassword = computed<boolean>(() => {
+    return props.hasPassword
+})
+
+const formSize = computed<'small' | 'default'>(() => {
+    if (hasPassword || hasUsername) {
+        return 'small'
+    } else {
+        return 'default'
+    }
+})
 
 const ruleFormRef = ref<FormInstance>();
 const drawer = ref(false)
@@ -149,10 +167,11 @@ function onSubmit() {
                         :before-close="handleClose">
                     <el-form
                             ref="ruleFormRef"
-                            :inline="true"
                             :model="formInfo"
+                            :inline="true"
                             :rules="rules"
-                            class="demo-form-inline">
+                            :size="formSize"
+                    >
                         <el-form-item label="Name" prop="name">
                             <el-input v-model="formInfo.name" placeholder="Name"/>
                         </el-form-item>
@@ -161,6 +180,12 @@ function onSubmit() {
                         </el-form-item>
                         <el-form-item label="Port" prop="port">
                             <el-input v-model="formInfo.port" placeholder="Port"/>
+                        </el-form-item>
+                        <el-form-item v-if="hasUsername" label="Username" prop="username">
+                            <el-input v-model="formInfo.username" placeholder="Port"/>
+                        </el-form-item>
+                        <el-form-item v-if="hasPassword" label="Password" prop="password">
+                            <el-input v-model="formInfo.password" placeholder="Port"/>
                         </el-form-item>
                         <el-form-item>
                             <el-button type="primary" @click="onSubmit">Submit</el-button>

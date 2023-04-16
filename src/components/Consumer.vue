@@ -13,6 +13,7 @@ import {Message} from "../api/common";
 const props = defineProps<{
     eventName: string
     topics: RawsReference<string[]>
+    cType: 'select' | 'input'
 }>()
 
 const topics = computed<string[]>(() => {
@@ -21,6 +22,10 @@ const topics = computed<string[]>(() => {
 
 const eventName = computed<string>(() => {
     return props.eventName
+})
+
+const selected = computed<boolean>(() => {
+    return Object.is(props.cType, 'select')
 })
 
 const info = ref<MqEntity>(new MqEntity())
@@ -68,14 +73,6 @@ function consumer() {
     }
 }
 
-function message(status: boolean) {
-    if (status) {
-        ElMessage.success('success')
-    } else {
-        ElMessage.success('fail')
-    }
-}
-
 </script>
 <template>
     <div class="consumer">
@@ -91,11 +88,20 @@ function message(status: boolean) {
             </el-scrollbar>
         </div>
         <div class="option">
-            <el-select v-model="consumerInfo.topic" filterable placeholder="Topic" class="kafka-sel">
-                <el-option v-for="item in topics"
-                           :value="item">
-                </el-option>
-            </el-select>
+            <div>
+                <div v-if="selected">
+                    <el-select v-model="consumerInfo.topic" filterable placeholder="Topic" class="kafka-sel">
+                        <el-option v-for="item in topics"
+                                   :value="item">
+                        </el-option>
+                    </el-select>
+                </div>
+                <div v-else>
+                    <el-input class="key" v-model="consumerInfo.topic"
+                              placeholder="Topic" clearable/>
+                </div>
+            </div>
+
             <el-input
                     class="kafka-group"
                     placeholder="Group"
