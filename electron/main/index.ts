@@ -1,6 +1,7 @@
 import {app, BrowserWindow, shell, ipcMain} from 'electron'
 import {release} from 'node:os'
 import {join} from 'node:path'
+import {RabbitEntity} from "../services/entity/rabbit.entity";
 
 
 // The built directory structure
@@ -132,3 +133,32 @@ export {
 import('../datasource/datasource')
 
 import("../server/server")
+
+import { AMQPClient } from '@cloudamqp/amqp-client'
+// const rabbitEntity = new RabbitEntity();
+// rabbitEntity.name = "dev"
+// rabbitEntity.host = "127.0.0.1"
+// rabbitEntity.port = 5672
+// rabbitEntity.username = 'admin'
+// rabbitEntity.password = '123456'
+// async function run() {
+//     try {
+//         const amqp = new AMQPClient(rabbitEntity.url)
+//         const conn = await amqp.connect()
+//         const ch = await conn.channel()
+//         const q = await ch.queue("hello")
+//         const consumer = await q.subscribe({noAck: true}, async (msg) => {
+//             console.log(msg.bodyToString())
+//             await consumer.cancel()
+//         })
+//         await q.publish("Hello World", {deliveryMode: 2})
+//         await consumer.wait() // will block until consumer is canceled or throw an error if server closed channel/connection
+//         await conn.close()
+//     } catch (e) {
+//         console.error("ERROR", e)
+//         e.connection.close()
+//         setTimeout(run, 1000) // will try to reconnect in 1s
+//     }
+// }
+//
+// run()

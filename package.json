@@ -38,6 +38,7 @@
     "vue-tsc": "^1.1.7"
   },
   "dependencies": {
+    "@cloudamqp/amqp-client": "^2.1.1",
     "@element-plus/icons-vue": "^2.1.0",
     "element-plus": "^2.2.36",
     "kafkajs": "^2.2.4",

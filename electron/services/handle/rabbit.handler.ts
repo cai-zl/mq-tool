@@ -1,6 +1,7 @@
 import {BaseHandler, Closeable, ConsumerInfo, MqOption, ProducerInfo} from "../common/common.handler";
 import {RabbitEntity} from "../entity/rabbit.entity";
 import {Socket} from "socket.io";
+import {AMQPClient} from '@cloudamqp/amqp-client'
 
 /**
  * @author cai zl
@@ -11,6 +12,9 @@ export class RabbitHandler extends BaseHandler<RabbitEntity> implements Closeabl
     private name: string
     private host: string
     private port: number
+    private username: string
+    private password: string
+    private client: AMQPClient
 
     private constructor(socket: Socket) {
         super(socket);
@@ -24,6 +28,17 @@ export class RabbitHandler extends BaseHandler<RabbitEntity> implements Closeabl
     }
 
     connect(option: string, entity: RabbitEntity, callback: Function): void {
+        this.client = new AMQPClient(entity.url)
+        this.name = entity.name
+        this.host = entity.host
+        this.port = entity.port
+        this.username = entity.username
+        this.password = entity.password
+        this.client.connect().then((conn) => {
+            // console.log(conn.channels);
+        }).catch((reason) => {
+            console.log('连接失败: ', reason)
+        })
     }
 
     consumer(option: string, consumerInfo: ConsumerInfo, callback: Function): void {

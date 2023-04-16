@@ -11,5 +11,9 @@ export class KafkaEntity extends BaseEntity implements MqEntity {
     host: string
     @Column({type: 'int'})
     port: number
+
+    get url(): string {
+        return this.host.concat(':').concat(this.port.toString())
+    }
 }
 

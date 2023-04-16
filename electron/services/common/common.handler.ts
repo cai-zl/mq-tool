@@ -12,6 +12,8 @@ export interface MqEntity {
     name: string
     host: string
     port: number
+
+    get url(): string
 }
 
 // MqOption mq服务的基本操作事件名
