@@ -171,25 +171,32 @@ function onSubmit() {
                             :inline="true"
                             :rules="rules"
                             :size="formSize"
+                            label-position="top"
+                            id="formInfo"
                     >
-                        <el-form-item label="Name" prop="name">
-                            <el-input v-model="formInfo.name" placeholder="Name"/>
-                        </el-form-item>
-                        <el-form-item label="Host" prop="host">
-                            <el-input v-model="formInfo.host" placeholder="Host"/>
-                        </el-form-item>
-                        <el-form-item label="Port" prop="port">
-                            <el-input v-model="formInfo.port" placeholder="Port"/>
-                        </el-form-item>
-                        <el-form-item v-if="hasUsername" label="Username" prop="username">
-                            <el-input v-model="formInfo.username" placeholder="Port"/>
-                        </el-form-item>
-                        <el-form-item v-if="hasPassword" label="Password" prop="password">
-                            <el-input v-model="formInfo.password" placeholder="Port"/>
-                        </el-form-item>
-                        <el-form-item>
-                            <el-button type="primary" @click="onSubmit">Submit</el-button>
-                        </el-form-item>
+                        <div>
+                            <el-form-item label="Name" prop="name">
+                                <el-input v-model="formInfo.name" placeholder="Name"/>
+                            </el-form-item>
+                            <el-form-item label="Host" prop="host">
+                                <el-input v-model="formInfo.host" placeholder="Host"/>
+                            </el-form-item>
+                            <el-form-item label="Port" prop="port">
+                                <el-input v-model="formInfo.port" placeholder="Port"/>
+                            </el-form-item>
+                            <el-form-item v-if="hasUsername" label="Username" prop="username">
+                                <el-input v-model="formInfo.username" placeholder="Username"/>
+                            </el-form-item>
+                            <el-form-item v-if="hasPassword" label="Password" prop="password">
+                                <el-input v-model="formInfo.password" placeholder="Password" type="password"
+                                          show-password/>
+                            </el-form-item>
+                        </div>
+                        <div>
+                            <el-form-item>
+                                <el-button type="primary" @click="onSubmit">Submit</el-button>
+                            </el-form-item>
+                        </div>
                     </el-form>
                 </el-drawer>
             </div>
@@ -197,6 +204,8 @@ function onSubmit() {
                 <el-table-column prop="name" label="Name"/>
                 <el-table-column prop="host" label="Host"/>
                 <el-table-column prop="port" label="Port"/>
+                <el-table-column v-if="hasUsername" prop="username" label="Username"/>
+                <el-table-column v-if="hasPassword" prop="password" label="Password"/>
                 <el-table-column align="right" fixed="right" width="200">
                     <template #header>
                         <el-button type="primary" size="small" @click="innerDrawer = true">Add</el-button>
@@ -254,5 +263,19 @@ function onSubmit() {
     justify-content: space-between;
     align-items: center;
   }
+
+
 }
+
+#formInfo {
+  display: flex;
+  flex-direction: column;
+
+  > div {
+    display: flex;
+    justify-content: center;
+  }
+
+}
+
 </style>
