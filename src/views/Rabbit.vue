@@ -23,9 +23,13 @@ const env = ref(new RawsReference(new MqEntity()))
                            has-password
                            has-username/>
         <div class="mq-option">
-            <Producer :textarea-row="20"/>
+            <Producer :textarea-row="21"
+                      :has-key="false"
+                      :event-name="event"/>
             <Consumer :event-name="event"
                       :topics="topics"
+                      :has-key="false"
+                      :has-group="false"
                       c-type="input"/>
         </div>
     </div>

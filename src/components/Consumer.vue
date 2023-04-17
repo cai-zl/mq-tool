@@ -14,7 +14,17 @@ const props = defineProps<{
     eventName: string
     topics: RawsReference<string[]>
     cType: 'select' | 'input'
+    hasGroup: boolean
+    hasKey: boolean
 }>()
+
+const hasGroup = computed<boolean>(() => {
+    return props.hasGroup
+})
+
+const hasKey = computed<boolean>(() => {
+    return props.hasKey
+})
 
 const topics = computed<string[]>(() => {
     return props.topics.value
@@ -56,9 +66,15 @@ watch(
 )
 
 function consumer() {
-    if (consumerInfo.value.groupId === '' || consumerInfo.value.topic === '') {
-        ElMessage.error('topic and group cannot be empty')
+    if (consumerInfo.value.topic === '') {
+        ElMessage.error('topic cannot be empty')
         return
+    }
+    if (hasGroup == true) {
+        if (consumerInfo.value.groupId === '') {
+            ElMessage.error('group cannot be empty')
+            return
+        }
     }
     if (consumerInfo.value.type === 1) {
         // 消费
@@ -80,7 +96,7 @@ function consumer() {
             <el-scrollbar ref="scrollbarRef" height="500px" class="box">
                 <div ref="innerRef">
                     <div v-for="(item, index) in messages" :key="item.key" id="message">
-                        <h1><strong class="c-title">key:</strong>{{ item.key }}</h1>
+                        <p v-if="hasKey"><strong class="c-title">key:</strong>{{ item.key }}</p>
                         <p><strong class="c-title">value:</strong>{{ item.value }}</p>
                         <el-divider/>
                     </div>
@@ -90,7 +106,7 @@ function consumer() {
         <div class="option">
             <div>
                 <div v-if="selected">
-                    <el-select v-model="consumerInfo.topic" filterable placeholder="Topic" class="kafka-sel">
+                    <el-select v-model="consumerInfo.topic" filterable placeholder="Topic" class="mq-sel">
                         <el-option v-for="item in topics"
                                    :value="item">
                         </el-option>
@@ -98,22 +114,25 @@ function consumer() {
                 </div>
                 <div v-else>
                     <el-input class="key" v-model="consumerInfo.topic"
-                              placeholder="Topic" clearable/>
+                              placeholder="Topic"/>
                 </div>
             </div>
-
-            <el-input
-                    class="kafka-group"
-                    placeholder="Group"
-                    v-model="consumerInfo.groupId"
-            ></el-input>
-            <el-button
-                    class="kafka-but"
-                    @click="consumer"
-                    type="primary">
-                <span v-if="consumerInfo.type==1">Start</span>
-                <span v-else>Stop</span>
-            </el-button>
+            <div v-if="hasGroup">
+                <el-input
+                        class="mq-group"
+                        placeholder="Group"
+                        v-model="consumerInfo.groupId"
+                ></el-input>
+            </div>
+            <div>
+                <el-button
+                        class="mq-but"
+                        @click="consumer"
+                        type="primary">
+                    <span v-if="consumerInfo.type==1">Start</span>
+                    <span v-else>Stop</span>
+                </el-button>
+            </div>
         </div>
     </div>
 </template>
@@ -122,8 +141,8 @@ function consumer() {
   display: flex;
   height: 100%;
   width: 50%;
-  flex: 1;
   margin: 0 1px;
+  flex: 1;
   flex-direction: column;
   justify-content: space-between;
   font-weight: 700;
@@ -143,6 +162,8 @@ function consumer() {
 
   .option {
     display: flex;
+    justify-content: space-between;
   }
+
 }
 </style>

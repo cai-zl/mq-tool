@@ -17,15 +17,6 @@ const io = new Server(3000, {
 
 io.on("connection", (socket: Socket) => {
     KafkaHandler.getInstance(socket).handle(Event.KAFKA, socket)
-    const rabbitHandler = RabbitHandler.getInstance(socket);
-    rabbitHandler.handle(Event.RABBIT, socket)
-    const rabbitEntity = new RabbitEntity();
-    rabbitEntity.name = "dev"
-    rabbitEntity.host = "127.0.0.1"
-    rabbitEntity.port = 5672
-    rabbitEntity.username = 'admin'
-    rabbitEntity.password = '123456'
-    rabbitHandler.connect( MqOption.CONNECT,rabbitEntity,()=>{})
-    socket.emit(Event.RABBIT, MqOption.CONNECT, rabbitEntity,()=>{})
+    RabbitHandler.getInstance(socket).handle(Event.RABBIT, socket)
 })
 

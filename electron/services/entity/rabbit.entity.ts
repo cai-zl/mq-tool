@@ -20,9 +20,5 @@ export class RabbitEntity extends BaseEntity implements MqEntity {
     @Column({type: 'text'})
     password: string
 
-    get url() {
-        return "amqp://" + this.username + ":" + this.password + "@" + this.host + ":" + this.port
-    }
-
 }
 

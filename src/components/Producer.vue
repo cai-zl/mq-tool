@@ -6,11 +6,21 @@
 import {socket} from "../api/socket";
 import {ElMessage} from "element-plus";
 import {ProducerInfo, ServerOption} from "../api/common";
-import {ref} from "vue";
+import {computed, ref} from "vue";
 
-defineProps<{
-    textareaRow?: number
+const props = defineProps<{
+    eventName: string
+    textareaRow: number
+    hasKey: boolean
 }>()
+
+const eventName = computed<string>(() => {
+    return props.eventName
+})
+
+const hasKey = computed<boolean>(() => {
+    return props.hasKey
+})
 
 const producerInfo = ref<ProducerInfo>({
     topic: '',
@@ -24,14 +34,14 @@ function producer() {
         return
     }
     // 生产
-    socket.emit("kafka", ServerOption.PRODUCER, producerInfo.value)
+    socket.emit(eventName.value, ServerOption.PRODUCER, producerInfo.value)
 }
 
 </script>
 <template>
     <div class="producer">
         <div>
-            <el-input class="key" v-model="producerInfo.key"
+            <el-input v-if='hasKey' class="key" v-model="producerInfo.key"
                       placeholder="key" clearable/>
             <el-input class="value" v-model="producerInfo!.value"
                       type="textarea"

@@ -77,9 +77,10 @@ export class KafkaHandler extends BaseHandler<KafkaEntity> implements Closeable,
     }
 
     connect(option: string, entity: KafkaEntity, callback: Function) {
+        console.log(entity)
         this.client = new Kafka({
             clientId: entity.name,
-            brokers: [entity.url],
+            brokers: [entity.host + ":" + entity.port],
         })
         this.name = entity.name
         this.host = entity.host

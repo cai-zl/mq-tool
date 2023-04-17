@@ -1,7 +1,8 @@
 import {BaseHandler, Closeable, ConsumerInfo, MqOption, ProducerInfo} from "../common/common.handler";
 import {RabbitEntity} from "../entity/rabbit.entity";
 import {Socket} from "socket.io";
-import {AMQPClient} from '@cloudamqp/amqp-client'
+import {AMQPClient, AMQPConsumer} from '@cloudamqp/amqp-client'
+import {AMQPBaseClient} from "@cloudamqp/amqp-client/types/amqp-base-client";
 
 /**
  * @author cai zl
@@ -15,6 +16,8 @@ export class RabbitHandler extends BaseHandler<RabbitEntity> implements Closeabl
     private username: string
     private password: string
     private client: AMQPClient
+    private baseClient: AMQPBaseClient
+    private active: AMQPConsumer
 
     private constructor(socket: Socket) {
         super(socket);
@@ -28,20 +31,29 @@ export class RabbitHandler extends BaseHandler<RabbitEntity> implements Closeabl
     }
 
     connect(option: string, entity: RabbitEntity, callback: Function): void {
-        this.client = new AMQPClient(entity.url)
+        this.client = new AMQPClient( "amqp://" + entity.username + ":" + entity.password + "@" + entity.host + ":" + entity.port)
         this.name = entity.name
         this.host = entity.host
         this.port = entity.port
         this.username = entity.username
         this.password = entity.password
         this.client.connect().then((conn) => {
-            // console.log(conn.channels);
+            this.baseClient = conn
         }).catch((reason) => {
             console.log('连接失败: ', reason)
         })
     }
 
     consumer(option: string, consumerInfo: ConsumerInfo, callback: Function): void {
+        this.baseClient.channel().then((ch) => {
+            ch.queue(consumerInfo.topic).then((q) => {
+                q.subscribe({noAck: true}, (msg) => {
+                    this.socket.emit(MqOption.CONSUMER, '', msg.bodyToString())
+                }).then((value) => {
+                    this.active = value
+                })
+            })
+        })
     }
 
     protected doRegistry(): void {
@@ -51,9 +63,31 @@ export class RabbitHandler extends BaseHandler<RabbitEntity> implements Closeabl
     }
 
     producer(option: string, producerInfo: ProducerInfo, callback: Function): void {
+        this.baseClient.channel().then((ch) => {
+            ch.queue(producerInfo.topic).then((q) => {
+                q.publish(producerInfo.value, {deliveryMode: 2})
+                    .then(() => {
+                        console.log('发送成功')
+                    })
+            })
+        })
     }
 
     close(): void {
+        if (this.active != undefined) {
+            this.active.cancel().then(() => {
+                console.log('消费停止成功')
+            }).catch((reason) => {
+                console.log('消费停止失败')
+            })
+        }
+        // if (this.baseClient != undefined) {
+        //     this.baseClient.close().then(() => {
+        //         console.log('amqp客户端关闭成功')
+        //     }).catch((reason) => {
+        //         console.log('amqp客户端关闭失败')
+        //     })
+        // }
     }
 
     list(option: string, entity: RabbitEntity, callback: Function) {
